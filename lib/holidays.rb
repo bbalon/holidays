@@ -178,6 +178,35 @@ module Holidays
     holidays.sort{|a, b| a[:date] <=> b[:date] }
   end
 
+  def self.working_days(start_date, end_date, region)
+    # remove the timezone
+    start_date = start_date.new_offset(0) + start_date.offset if start_date.respond_to?(:new_offset)
+    end_date = end_date.new_offset(0) + end_date.offset if end_date.respond_to?(:new_offset)
+
+    # get simple dates
+    if start_date.respond_to?(:to_date)
+      start_date = start_date.to_date
+    else
+      start_date = Date.civil(start_date.year, start_date.mon, start_date.mday)
+    end
+
+    if end_date.respond_to?(:to_date)
+      end_date = end_date.to_date
+    else
+      end_date = Date.civil(end_date.year, end_date.mon, end_date.mday)
+    end
+
+    count = 0
+
+    (start_date..end_date).each do |date|
+      unless date.holiday?(region) or date.sunday? or date.saturday?
+        count += 1
+      end
+    end
+
+    count
+  end
+
   # Merge a new set of definitions into the Holidays module.
   #
   # This method is automatically called when including holiday definition
